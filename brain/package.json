@@ -12,10 +12,14 @@
     "@jup-ag/core": "^1.2.0",
     "ws": "^8.13.0",
     "dotenv": "^16.3.1",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "bs58": "^5.0.0",
+    "bn.js": "^5.2.1"
   },
   "devDependencies": {
     "esbuild-register": "^3.5.0",
-    "typescript": "^5.3.2"
+    "typescript": "^5.3.2",
+    "@types/bn.js": "^5.1.0",
+    "@types/node-fetch": "^3.0.3"
   }
 }

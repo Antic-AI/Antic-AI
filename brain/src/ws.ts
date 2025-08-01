@@ -1,7 +1,7 @@
-import { WebSocketServer } from "ws";
+import WebSocket from "ws";
 
-const port = Number(process.env.WS_PORT ?? 8080);
-export const wss = new WebSocketServer({ port });
+const port = Number(process.env.PORT ?? process.env.WS_PORT ?? 8080);
+export const wss = new WebSocket.Server({ port });
 
 export function broadcast(data: any) {
   const json = JSON.stringify(data);
