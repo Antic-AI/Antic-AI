@@ -1,0 +1,6 @@
+{
+  "name": "antic",
+  "private": true,
+  "workspaces": ["brain", "dashboard"],
+  "packageManager": "pnpm@8.10.0"
+}
