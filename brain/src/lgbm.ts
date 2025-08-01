@@ -21,7 +21,13 @@ async function lazyLoad() {
 
 export async function predict(features: number[]): Promise<number> {
   const b = await lazyLoad();
-  if (!b) return 0.5; // neutral probability
+  if (!b) {
+    // fallback linear heuristic
+    const w = [0.00002, 0.0000003, 0.05, -0.0005, 1.2, 0.002];
+    const bias = -2;
+    const z = features.reduce((acc, v, i) => acc + (w[i] ?? 0.001) * v, bias);
+    return 1 / (1 + Math.exp(-z));
+  }
   const res = b.predict([features]);
   return res[0] as number;
 }

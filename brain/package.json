@@ -4,8 +4,8 @@
   "main": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "node --env-file=.env -r esbuild-register src/index.ts",
-    "dev": "node --env-file=.env -r esbuild-register src/index.ts"
+    "start": "node -r dotenv/config -r esbuild-register src/index.ts",
+    "dev": "node -r dotenv/config -r esbuild-register src/index.ts"
   },
   "dependencies": {
     "@solana/web3.js": "^1.92.1", 
