@@ -1,0 +1,3 @@
+# environment variables
+brain/.env
+dashboard/.env.local
