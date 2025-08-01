@@ -48,14 +48,19 @@ async function getPriceInSOL(mint: string, solUsd: number): Promise<number> {
   return usd / solUsd;
 }
 
+import { recommendedSize, canTrade, handleTradeOutcome } from "./risk.js";
+
 export async function maybeTrade(c: Candidate, prob: number) {
   if (kill) return;
   if (positions[c.mint]) return;
   if (prob < 0.8) return;
   if (exposure >= MAX_SOL_TOTAL) return;
 
+  if (!canTrade()) return;
+
   const solUsd = await getUsdPrice(SOL_MINT.toString());
-  const sizeSOL = Math.min(MAX_TRADE_SOL, (c.liqUSD / solUsd) * 0.002);
+  const dynamicSize = recommendedSize();
+  const sizeSOL = Math.min(dynamicSize, MAX_TRADE_SOL, (c.liqUSD / solUsd) * 0.002);
   if (exposure + sizeSOL > MAX_SOL_TOTAL) return;
 
   const price = await getPriceInSOL(c.mint, solUsd);
@@ -98,6 +103,7 @@ async function closePosition(p: Position, reason: string) {
   exposure -= p.size * price;
   delete positions[p.mint];
   broadcast({ type: "close", mint: p.mint, symbol: p.symbol, pnl, reason, txid });
+  handleTradeOutcome(pnl);
   if (realized < -Number(process.env.MAX_DRAWDOWN_SOL ?? 1)) {
     kill = true;
     broadcast({ type: "kill", reason: "drawdown" });
