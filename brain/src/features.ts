@@ -73,7 +73,12 @@ export async function buildFeatures(c: Candidate, sentiment: { score: number; vo
     }
   } catch {}
 
-  const { slip100 } = await computeSlip(c.mint);
+  const { quoteOutAmount } = await import("./jup.js");
+  const out1 = await quoteOutAmount(c.mint, 1e9);
+  const out100 = await quoteOutAmount(c.mint, 100e9);
+  const price1 = out1 / 1;
+  const price100 = out100 / 100;
+  const slip100 = price1 ? (price1 - price100) / price1 : 0;
   const solUsd = await priceApi(SOL_MINT.toString());
 
   const names = [

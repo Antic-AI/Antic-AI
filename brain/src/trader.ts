@@ -75,7 +75,8 @@ export async function maybeTrade(c: Candidate, prob: number, featVec: number[]) 
 
   const price = await getPriceInSOL(c.mint, solUsd);
   const lamports = Math.round(sizeSOL * 1e9);
-  const txid = await executeSwap(SOL_MINT, new PublicKey(c.mint), lamports);
+  const { swapSOLToToken } = await import("./jup.js");
+  const txid = await swapSOLToToken(c.mint, lamports);
   if (!txid) return;
 
   const tokenOut = sizeSOL / price;

@@ -27,15 +27,9 @@ const positions: Record<string, ShadowPos> = {};
 
 export async function shadowTrade(mint: string, symbol: string, alloc: number, state: number[], risk: RiskMetrics) {
   const outputMint = new PublicKey(mint);
-  const j = await getJup();
-  const { routesInfos } = await j.computeRoutes({
-    inputMint: SOL_MINT,
-    outputMint,
-    amount: new BN(1e9 * Math.abs(alloc)), // simulate 1 SOL * alloc
-    slippageBps: 100,
-  });
-  const out = routesInfos?.[0]?.outAmount ?? 0;
-  const price = Number(out) / Math.abs(alloc);
+  import { quoteOutAmount } from "./jup.js";
+  const out = await quoteOutAmount(mint, 1e9 * Math.abs(alloc));
+  const price = out / Math.abs(alloc);
   positions[mint] = { entry: price, size: out / 1e9 };
   broadcast({ type: "shadow_trade", mint, symbol, alloc, price });
   // log zero reward until close
