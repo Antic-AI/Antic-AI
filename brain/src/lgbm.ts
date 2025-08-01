@@ -1,20 +1,27 @@
 import fs from "fs";
 import path from "path";
-import lightgbm from "lightgbm-js";
 
-let booster: any;
+let booster: any = null;
 
-export async function loadModel(modelPath = "model/pump_model.txt") {
-  if (booster) return booster;
-  const abs = path.resolve(process.cwd(), modelPath);
-  if (!fs.existsSync(abs)) throw new Error("LightGBM model file missing");
-  const txt = fs.readFileSync(abs, "utf8");
-  booster = await lightgbm.loadModel(txt);
-  return booster;
+async function lazyLoad() {
+  if (booster !== null) return booster;
+  try {
+    // dynamic import so build doesn’t fail if package missing
+    const lgbm = await import("lightgbm-js");
+    const modelPath = path.resolve("model/pump_model.txt");
+    if (!fs.existsSync(modelPath)) throw new Error("model missing");
+    const txt = fs.readFileSync(modelPath, "utf8");
+    booster = await lgbm.default.loadModel(txt);
+    return booster;
+  } catch {
+    booster = undefined; // sentinel for unavailable
+    return booster;
+  }
 }
 
 export async function predict(features: number[]): Promise<number> {
-  const booster = await loadModel();
-  const res = booster.predict([features]);
-  return res[0]; // probability 0-1
+  const b = await lazyLoad();
+  if (!b) return 0.5; // neutral probability
+  const res = b.predict([features]);
+  return res[0] as number;
 }

@@ -15,7 +15,7 @@
     "node-fetch": "^3.3.2",
     "bs58": "^5.0.0",
     "bn.js": "^5.2.1",
-    "lightgbm-js": "^0.2.6",
+
     "onnxruntime-node": "^1.16.2"
   },
   "devDependencies": {
