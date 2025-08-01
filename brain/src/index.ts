@@ -36,7 +36,7 @@ discovery.on("candidate", async c => {
   const feat = await buildFeatures(c, sent);
   const prob = await score(feat.vec);
   broadcast({ type: "candidate", mint: c.mint, symbol: c.symbol, prob });
-  await maybeTrade(c, prob);
+  await maybeTrade(c, prob, feat.vec);
   top.push({ candidate: c, prob });
   top.sort((a, b) => b.prob - a.prob);
   if (top.length > 10) top.pop();

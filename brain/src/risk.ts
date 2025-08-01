@@ -16,6 +16,11 @@ function stdev(arr: number[]): number {
   return Math.sqrt(v);
 }
 
+export interface RiskMetrics { sd: number; var95: number; exposure: number }
+let lastSd = 0;
+let lastVar = 0;
+let lastExpo = 0;
+
 export function recommendedSize(): number {
   if (pnlHistory.length < 10) return baseSize;
   const sd = stdev(pnlHistory);
@@ -23,7 +28,13 @@ export function recommendedSize(): number {
   if (var95 === 0) return baseSize;
   const scale = targetVaR / var95;
   const size = Math.min(baseSize * Math.max(0.2, scale), baseSize * 5);
+  lastSd = sd; lastVar = var95;
   return size;
+}
+
+export function snapshotRisk(exposure: number): RiskMetrics {
+  lastExpo = exposure;
+  return { sd: lastSd, var95: lastVar, exposure };
 }
 
 let lastLossTs = 0;

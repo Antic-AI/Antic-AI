@@ -49,8 +49,9 @@ async function getPriceInSOL(mint: string, solUsd: number): Promise<number> {
 }
 
 import { recommendedSize, canTrade, handleTradeOutcome } from "./risk.js";
+import { shadowTrade } from "./shadow.js";
 
-export async function maybeTrade(c: Candidate, prob: number) {
+export async function maybeTrade(c: Candidate, prob: number, featVec: number[]) {
   if (kill) return;
   if (positions[c.mint]) return;
   if (prob < 0.8) return;
@@ -59,8 +60,17 @@ export async function maybeTrade(c: Candidate, prob: number) {
   if (!canTrade()) return;
 
   const solUsd = await getUsdPrice(SOL_MINT.toString());
+  const { snapshotRisk } = await import("./risk.js");
+  const riskSnap = snapshotRisk(exposure);
+  const { buildState } = await import("./state.js");
+  const stateVec = buildState(featVec, riskSnap);
+  const { decide } = await import("./ppo.js");
+  const alloc = await decide(stateVec); // -1..1
+  broadcast({ type: "agent", mint: c.mint, symbol: c.symbol, alloc });
+  await shadowTrade(c.mint, c.symbol, alloc, Array.from(stateVec), riskSnap);
+  if (alloc <= 0) return; // long-only for now
   const dynamicSize = recommendedSize();
-  const sizeSOL = Math.min(dynamicSize, MAX_TRADE_SOL, (c.liqUSD / solUsd) * 0.002);
+  const sizeSOL = Math.min(dynamicSize * alloc, MAX_TRADE_SOL, (c.liqUSD / solUsd) * 0.002);
   if (exposure + sizeSOL > MAX_SOL_TOTAL) return;
 
   const price = await getPriceInSOL(c.mint, solUsd);
