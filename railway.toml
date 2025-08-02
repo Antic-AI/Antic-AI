@@ -1,0 +1,19 @@
+# Root Railway configuration – ensures the platform detects the service even when the code lives in a sub-folder.
+# This file sits at repo root so Railway’s "config as code" finds it.
+
+[build]
+# Build only the brain folder (contains package.json and tsconfig)
+root = "brain"
+
+[deploy]
+# Trigger redeploys when something inside the brain folder changes
+watchPaths = ["brain/**"]
+
+[service]
+# Web service – Railway injects $PORT and waits for health-checks.
+    type = "web"
+    port = 8080          # Internal port our Node server listens on
+    healthcheckPath = "/"  # '/' returns plain 'ok' in ws.ts
+
+# Run the brain’s start script from repository root
+startCommand = "npm start --prefix brain"
