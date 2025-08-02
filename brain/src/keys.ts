@@ -10,20 +10,25 @@ export function loadKeypair(): Keypair {
   }
   const kpStr = raw.trim();
 
-  // JSON array directly in env
-  if (kpStr.startsWith("[")) {
-    return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(kpStr)));
-  }
+  try {
+    // JSON array directly in env
+    if (kpStr.startsWith("[")) {
+      return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(kpStr)));
+    }
 
-  // Base58 secret key string
-  if (!kpStr.includes("/")) {
-    return Keypair.fromSecretKey(bs58.decode(kpStr));
-  }
+    // Base58 secret key string
+    if (!kpStr.includes("/")) {
+      return Keypair.fromSecretKey(bs58.decode(kpStr));
+    }
 
-  // Treat as file path
-  const content = fs.readFileSync(kpStr, "utf8").trim();
-  if (content.startsWith("[")) {
-    return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(content)));
+    // Treat as file path
+    const content = fs.readFileSync(kpStr, "utf8").trim();
+    if (content.startsWith("[")) {
+      return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(content)));
+    }
+    return Keypair.fromSecretKey(bs58.decode(content));
+  } catch (err) {
+    console.error("[WARN] Failed to parse KEYPAIR – continuing with random keypair (trading disabled).", (err as Error)?.message || err);
+    return Keypair.generate();
   }
-  return Keypair.fromSecretKey(bs58.decode(content));
 }
