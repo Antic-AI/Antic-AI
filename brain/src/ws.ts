@@ -1,7 +1,8 @@
-import ws from "ws";
+import * as ws from "ws";
 
 const port = Number(process.env.PORT ?? process.env.WS_PORT ?? 8080);
-export const wss = new ws.Server({ port });
+// @ts-ignore
+export const wss = new ws.WebSocketServer({ port });
 
 export function broadcast(data: any) {
   const json = JSON.stringify(data);
