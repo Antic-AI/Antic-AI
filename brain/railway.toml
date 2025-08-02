@@ -1,0 +1,12 @@
+# Railway configuration scoped to the backend service
+# This file must live inside the service root (brain/) so Railway picks it up.
+
+[build]
+root = "."  # build context is already brain/, so keep dot
+
+[deploy]
+watchPaths = ["./**"]  # redeploy only on changes inside brain
+
+[service]
+type = "worker"                   # no health-check; Railway won't kill it
+startCommand = "tsx -r dotenv/config src/index.ts"
