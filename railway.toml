@@ -1,0 +1,18 @@
+# Railway configuration for Antic brain service
+
+[build]
+# Only build files inside the backend directory
+root = "brain"
+
+[deploy]
+# Only redeploy this service when backend code changes
+watchPaths = [
+  "/brain/**"
+]
+
+[service]
+# Run the TypeScript entry with tsx and dotenv support
+startCommand = "tsx -r dotenv/config src/index.ts"
+# Mark as a worker so Railway doesn’t apply web health-checks
+# (WebSocket + stub HTTP server will still work.)
+type = "worker"
