@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 type AgentMsg = { type: "agent"; mint: string; symbol: string; alloc: number };
 
 export default function AgentView() {
-  const [events, setEvents] = useState<AgentMsg[]>([]);
+  const [events, setEvents] = useState([] as AgentMsg[]);
 
   useEffect(() => {
     const url = process.env.NEXT_PUBLIC_WS ?? "ws://localhost:8080";
