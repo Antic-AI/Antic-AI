@@ -8,5 +8,7 @@ root = "."  # build context is already brain/, so keep dot
 watchPaths = ["./**"]  # redeploy only on changes inside brain
 
 [service]
-type = "worker"                   # no health-check; Railway won't kill it
+# Expose an HTTP/WebSocket endpoint so Railway keeps the container alive
+# and routes traffic correctly. Use the port provided in $PORT.
+    type = "web"
 startCommand = "tsx -r dotenv/config src/index.ts"
