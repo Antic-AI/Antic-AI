@@ -1,6 +1,4 @@
 import { Connection, Keypair, PublicKey } from "@solana/web3.js";
-import { Jupiter } from "@jup-ag/core";
-import BN from "bn.js";
 import fetch from "node-fetch";
 import { Candidate } from "./discovery.js";
 import { broadcast } from "./ws.js";
@@ -17,12 +15,6 @@ const SL_PCT = Number(process.env.SL_PCT ?? 0.15);
 const conn = new Connection(RPC, "confirmed");
 const kp: Keypair = loadKeypair();
 
-let jupiter: any = null;
-async function getJupiter(): Promise<any> {
-  if (jupiter) return jupiter;
-  jupiter = await Jupiter.load({ connection: conn, cluster: "mainnet-beta", user: kp });
-  return jupiter;
-}
 
 interface Position {
   mint: string;
@@ -85,29 +77,13 @@ export async function maybeTrade(c: Candidate, prob: number, featVec: number[]) 
   broadcast({ type: "trade", mint: c.mint, symbol: c.symbol, prob, txid });
 }
 
-async function executeSwap(input: PublicKey, output: PublicKey, amount: number): Promise<string | null> {
-  try {
-    const jup = await getJupiter();
-    const { routesInfos } = await jup.computeRoutes({
-      inputMint: input,
-      outputMint: output,
-      amount: new BN(amount),
-      slippageBps: 50,
-    });
-    if (!routesInfos?.length) return null;
-    const route: any = routesInfos[0];
-    const { txid } = await jup.execute({ route, userPublicKey: kp.publicKey });
-    return txid;
-  } catch {
-    return null;
-  }
-}
 
 async function closePosition(p: Position, reason: string) {
   const solUsd = await getUsdPrice(SOL_MINT.toString());
   const price = await getPriceInSOL(p.mint, solUsd);
   const lamportsOut = Math.round(p.size * price * 1e9);
-  const txid = await executeSwap(new PublicKey(p.mint), SOL_MINT, lamportsOut);
+  const { swapTokenToSOL } = await import("./jup.js");
+  const txid = await swapTokenToSOL(p.mint, lamportsOut);
   if (!txid) return;
   const pnl = (price - p.entry) * p.size;
   realized += pnl;
