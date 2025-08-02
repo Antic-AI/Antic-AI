@@ -19,8 +19,8 @@ interface TradeRow {
 }
 
 export default function Home() {
-  const [cands, setCands] = useState<Record<string, CandRow>>({});
-  const [trades, setTrades] = useState<TradeRow[]>([]);
+  const [cands, setCands] = useState({} as Record<string, CandRow>);
+  const [trades, setTrades] = useState([] as TradeRow[]);
 
   useEffect(() => {
     const url = process.env.NEXT_PUBLIC_WS ?? "ws://localhost:8080";

@@ -14,7 +14,7 @@ interface Row {
 }
 
 export default function Shadow() {
-  const [rows, setRows] = useState<Row[]>([]);
+  const [rows, setRows] = useState([] as Row[]);
 
   useEffect(() => {
     const ws = new WebSocket(process.env.NEXT_PUBLIC_WS ?? "ws://localhost:8080");
