@@ -5,8 +5,8 @@ import fs from "fs";
 export function loadKeypair(): Keypair {
   const raw = process.env.KEYPAIR;
   if (!raw || raw.trim() === "") {
-    console.error("[DEBUG] KEYPAIR env is missing or empty. Value seen:", raw);
-    throw new Error("KEYPAIR env not set");
+    console.error("[WARN] KEYPAIR env is missing or empty – generating ephemeral keypair (trading disabled).");
+    return Keypair.generate();
   }
   const kpStr = raw.trim();
 
