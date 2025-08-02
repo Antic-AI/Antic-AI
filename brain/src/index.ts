@@ -9,6 +9,12 @@ process.on("unhandledRejection", (reason, p) => {
 process.on("SIGTERM", () => {
   console.error("[INFO] Received SIGTERM, shutting down.");
 });
+process.on("beforeExit", code => {
+  console.error("[INFO] beforeExit event. Code:", code);
+});
+process.on("exit", code => {
+  console.error("[INFO] exit event. Code:", code);
+});
 
 console.log("Antic brain booting...");
 
