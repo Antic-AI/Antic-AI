@@ -1,22 +1,10 @@
 import { PublicKey } from "@solana/web3.js";
-import BN from "bn.js";
-import { Jupiter } from "@jup-ag/core";
-import { Connection } from "@solana/web3.js";
-import { loadKeypair } from "./keys.js";
 import { broadcast } from "./ws.js";
 import { logStep } from "./experience.js";
 import { RiskMetrics } from "./risk.js";
+import fetch from "node-fetch";
 
-const RPC = process.env.SOL_RPC ?? "https://api.mainnet-beta.solana.com";
-const SOL_MINT = new PublicKey("So11111111111111111111111111111111111111112");
-const conn = new Connection(RPC, "confirmed");
-const kp = loadKeypair();
-let jup: any;
-async function getJup() {
-  if (jup) return jup;
-  jup = await Jupiter.load({ connection: conn, cluster: "mainnet-beta", user: kp });
-  return jup;
-}
+const SOL_MINT_ID = "So11111111111111111111111111111111111111112";
 
 interface ShadowPos {
   entry: number;
@@ -26,27 +14,25 @@ interface ShadowPos {
 const positions: Record<string, ShadowPos> = {};
 
 export async function shadowTrade(mint: string, symbol: string, alloc: number, state: number[], risk: RiskMetrics) {
-  const outputMint = new PublicKey(mint);
-  import { quoteOutAmount } from "./jup.js";
+  const { quoteOutAmount } = await import("./jup.js");
   const out = await quoteOutAmount(mint, 1e9 * Math.abs(alloc));
   const price = out / Math.abs(alloc);
   positions[mint] = { entry: price, size: out / 1e9 };
   broadcast({ type: "shadow_trade", mint, symbol, alloc, price });
-  // log zero reward until close
   logStep({ s: state, a: alloc, r: 0, s2: state, ts: Date.now() });
 }
 
-async function getUsd(mint: string): Promise<number> {
-  const r = await fetch(`https://price.jup.ag/v4/price?ids=${mint}`);
+async function getUsd(id: string): Promise<number> {
+  const r = await fetch(`https://price.jup.ag/v4/price?ids=${id}`);
   const j: any = await r.json();
-  return j.data[mint].price;
+  return j.data[id].price;
 }
 
 export async function shadowTick() {
   for (const mint of Object.keys(positions)) {
     const pos = positions[mint];
     const usd = await getUsd(mint);
-    const solUsd = await getUsd(SOL_MINT.toString());
+    const solUsd = await getUsd(SOL_MINT_ID);
     const p = usd / solUsd;
     const pnl = (p - pos.entry) * pos.size;
     if (Math.abs(pnl) / pos.entry > 0.3) {
@@ -58,4 +44,3 @@ export async function shadowTick() {
 }
 
 setInterval(shadowTick, 30_000);
-
