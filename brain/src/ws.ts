@@ -1,7 +1,7 @@
 import * as ws from "ws";
 import http from "http";
 
-const port = Number(process.env.PORT ?? process.env.WS_PORT ?? 8080);
+const port = Number(process.env.PORT ?? 8080);
 
 // Create a tiny HTTP server so platform health-checks (Railway/Vercel) get a
 // 200 OK and keep the container alive. Attach WebSocketServer to the same
