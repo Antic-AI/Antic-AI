@@ -3,8 +3,12 @@ import bs58 from "bs58";
 import fs from "fs";
 
 export function loadKeypair(): Keypair {
-  const kpStr = process.env.KEYPAIR?.trim();
-  if (!kpStr) throw new Error("KEYPAIR env not set");
+  const raw = process.env.KEYPAIR;
+  if (!raw || raw.trim() === "") {
+    console.error("[DEBUG] KEYPAIR env is missing or empty. Value seen:", raw);
+    throw new Error("KEYPAIR env not set");
+  }
+  const kpStr = raw.trim();
 
   // JSON array directly in env
   if (kpStr.startsWith("[")) {
