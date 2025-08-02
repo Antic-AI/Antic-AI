@@ -1,5 +1,15 @@
 import { Discovery } from "./discovery.js";
 
+process.on("uncaughtException", err => {
+  console.error("[FATAL] Uncaught exception:", err);
+});
+process.on("unhandledRejection", (reason, p) => {
+  console.error("[FATAL] Unhandled promise rejection:", reason);
+});
+process.on("SIGTERM", () => {
+  console.error("[INFO] Received SIGTERM, shutting down.");
+});
+
 console.log("Antic brain booting...");
 
 const discovery = new Discovery();
