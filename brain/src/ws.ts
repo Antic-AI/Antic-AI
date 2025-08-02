@@ -11,7 +11,7 @@ const server = http.createServer((_req, res) => {
   res.end("ok");
 });
 
-server.listen(port, () => {
+server.listen(port, "0.0.0.0", () => {
   console.log(`WS+HTTP server listening on ${port}`);
 });
 
